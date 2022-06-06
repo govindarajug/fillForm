@@ -1,7 +1,7 @@
 const fs = require('fs');
 process.stdin.setEncoding('utf8');
-const print = (text) => console.log(text);
 
+const print = (text) => console.log(text);
 class Details {
   #allDetails;
   #index;
@@ -17,6 +17,9 @@ class Details {
   }
 
   message() {
+    if (this.#index >= this.#detailsNeeded.length) {
+      return '';
+    }
     return `Please enter your ${this.currentDetail()}`;
   }
 
@@ -24,9 +27,18 @@ class Details {
     return this.#detailsNeeded[this.#index];
   }
 
-  addDetail(input) {
-    this.#allDetails[this.currentDetail()] = input;
+  nextDetail() {
     this.#index++;
+    return this.#detailsNeeded[this.#index];
+  }
+
+  addDetail(input) {
+    if (this.currentDetail() === 'hobbies') {
+      this.#allDetails[this.currentDetail()] = input.split(',');
+    } else {
+      this.#allDetails[this.currentDetail()] = input;
+    }
+    this.nextDetail();
   }
 }
 
@@ -34,12 +46,12 @@ const formDetails = ['name', 'DOB', 'hobbies'];
 const form = new Details(formDetails);
 print(form.message());
 
-process.stdin.on('data', (chunk) => {
-  form.addDetail(chunk.trim('\n'));
+process.stdin.on('data', (detail) => {
+  form.addDetail(detail.trim('\n'));
   print(form.message());
 });
 
 process.stdin.on('end', () => {
   fs.writeFileSync('form.json', form.toString(), 'utf8');
-  console.log('Thank you');
+  print('Thank you');
 });
