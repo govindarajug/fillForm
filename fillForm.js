@@ -1,19 +1,45 @@
+const fs = require('fs');
 process.stdin.setEncoding('utf8');
-const details = [];
-let index = 0;
 const print = (text) => console.log(text);
-const messages = ['name', 'dob', 'hobbies'];
 
-const fillForm = (detail) => {
-  details.push(detail);
-  print(messages[index]);
-  index++;
-};
+class Details {
+  #allDetails;
+  #index;
+  #detailsNeeded;
+  constructor(detailsNeeded) {
+    this.#detailsNeeded = detailsNeeded;
+    this.#allDetails = {};
+    this.#index = 0;
+  }
+
+  toString() {
+    return JSON.stringify(this.#allDetails);
+  }
+
+  message() {
+    return `Please enter your ${this.currentDetail()}`;
+  }
+
+  currentDetail() {
+    return this.#detailsNeeded[this.#index];
+  }
+
+  addDetail(input) {
+    this.#allDetails[this.currentDetail()] = input;
+    this.#index++;
+  }
+}
+
+const formDetails = ['name', 'DOB', 'hobbies'];
+const form = new Details(formDetails);
+print(form.message());
 
 process.stdin.on('data', (chunk) => {
-  fillForm(chunk.trim());
+  form.addDetail(chunk.trim('\n'));
+  print(form.message());
 });
 
 process.stdin.on('end', () => {
+  fs.writeFileSync('form.json', form.toString(), 'utf8');
   console.log('Thank you');
 });
