@@ -42,8 +42,13 @@ class Details {
   }
 }
 
-const formDetails = ['name', 'DOB', 'hobbies'];
-const form = new Details(formDetails);
+const queries = [
+  { query: 'name' },
+  { query: 'DOB' },
+  { query: 'hobbies' }
+];
+
+const form = new Details(queries.map(x => x.query));
 print(form.message());
 
 process.stdin.on('data', (detail) => {
