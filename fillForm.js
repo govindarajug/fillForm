@@ -1,8 +1,8 @@
 const fs = require('fs');
 process.stdin.setEncoding('utf8');
-
 const print = (text) => console.log(text);
-class Details {
+
+class Form {
   #allDetails;
   #index;
   #detailsNeeded;
@@ -18,7 +18,7 @@ class Details {
 
   message() {
     if (this.#index >= this.#detailsNeeded.length) {
-      return '';
+      return 'press CTRL + D to save your details';
     }
     return `Please enter your ${this.currentDetail()}`;
   }
@@ -29,7 +29,7 @@ class Details {
 
   nextDetail() {
     this.#index++;
-    return this.#detailsNeeded[this.#index];
+    return this.currentDetail();
   }
 
   addDetail(input) {
@@ -48,7 +48,7 @@ const queries = [
   { query: 'hobbies' }
 ];
 
-const form = new Details(queries.map(x => x.query));
+const form = new Form(queries.map(x => x.query));
 print(form.message());
 
 process.stdin.on('data', (detail) => {
@@ -56,7 +56,7 @@ process.stdin.on('data', (detail) => {
   print(form.message());
 });
 
-process.stdin.on('end', () => {
+process.stdin.on('close', () => {
   fs.writeFileSync('form.json', form.toString(), 'utf8');
   print('Thank you');
 });
