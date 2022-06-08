@@ -1,62 +1,34 @@
 const fs = require('fs');
-process.stdin.setEncoding('utf8');
+const { Form } = require('./src/form.js');
 const print = (text) => console.log(text);
 
-class Form {
-  #allDetails;
-  #index;
-  #detailsNeeded;
-  constructor(detailsNeeded) {
-    this.#detailsNeeded = detailsNeeded;
-    this.#allDetails = {};
-    this.#index = 0;
-  }
-
-  toString() {
-    return JSON.stringify(this.#allDetails);
-  }
-
-  message() {
-    if (this.#index >= this.#detailsNeeded.length) {
-      return 'press CTRL + D to save your details';
-    }
-    return `Please enter your ${this.currentDetail()}`;
-  }
-
-  currentDetail() {
-    return this.#detailsNeeded[this.#index];
-  }
-
-  nextDetail() {
-    this.#index++;
-    return this.currentDetail();
-  }
-
-  addDetail(input) {
-    if (this.currentDetail() === 'hobbies') {
-      this.#allDetails[this.currentDetail()] = input.split(',');
+const recordResponse = (form) => {
+  process.stdin.setEncoding('utf8');
+  process.stdin.on('data', (detail) => {
+    form.addDetail(detail.trim('\n'));
+    if (form.isFilled()) {
+      process.stdin.destroy();
     } else {
-      this.#allDetails[this.currentDetail()] = input;
+      print(form.message());
     }
-    this.nextDetail();
-  }
-}
+  });
 
-const queries = [
-  { query: 'name' },
-  { query: 'DOB' },
-  { query: 'hobbies' }
-];
+  process.stdin.on('close', () => {
+    fs.writeFileSync('form.json', form.toString(), 'utf8');
+    print('Thank you');
+  });
+};
 
-const form = new Form(queries.map(x => x.query));
-print(form.message());
-
-process.stdin.on('data', (detail) => {
-  form.addDetail(detail.trim('\n'));
+const main = () => {
+  const queries = [
+    { query: 'name' },
+    { query: 'DOB' },
+    { query: 'hobbies' }
+  ];
+  
+  const form = new Form(queries.map(x => x.query));
   print(form.message());
-});
+  recordResponse(form);
+};
 
-process.stdin.on('close', () => {
-  fs.writeFileSync('form.json', form.toString(), 'utf8');
-  print('Thank you');
-});
+main();
