@@ -1,15 +1,20 @@
 class Form {
-  #allDetails;
   #index;
-  #detailsNeeded;
-  constructor(detailsNeeded) {
-    this.#detailsNeeded = detailsNeeded;
-    this.#allDetails = {};
+  #fields;
+  constructor(fields) {
+    this.#fields = fields;
     this.#index = 0;
   }
 
   toString() {
-    return JSON.stringify(this.#allDetails);
+    return JSON.stringify(this.getResponses());
+  }
+
+  getResponses() {
+    return this.#fields.reduce((responses, fields) => {
+      responses[fields.name] = fields.response;
+      return responses;
+    }, {});
   }
 
   message() {
@@ -17,20 +22,20 @@ class Form {
   }
 
   currentDetail() {
-    return this.#detailsNeeded[this.#index];
+    return this.#fields[this.#index].name;
   }
 
   addDetail(response) {
     if (this.currentDetail() === 'hobbies') {
-      this.#allDetails[this.currentDetail()] = response.split(',');
+      this.#fields[this.#index].response = response.split(',');
     } else {
-      this.#allDetails[this.currentDetail()] = response;
+      this.#fields[this.#index].response = response;
     }
     this.#index++;
   }
 
   isFilled() {
-    return this.#index >= this.#detailsNeeded.length;
+    return this.#index >= this.#fields.length;
   }
 }
 

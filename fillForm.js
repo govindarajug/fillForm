@@ -1,34 +1,19 @@
-const fs = require('fs');
+const { recordResponse } = require('./src/recordResponse.js');
 const { Form } = require('./src/form.js');
-const print = (text) => console.log(text);
-
-const recordResponse = (form) => {
-  process.stdin.setEncoding('utf8');
-  process.stdin.on('data', (detail) => {
-    form.addDetail(detail.trim('\n'));
-    if (form.isFilled()) {
-      process.stdin.destroy();
-    } else {
-      print(form.message());
-    }
-  });
-
-  process.stdin.on('close', () => {
-    fs.writeFileSync('form.json', form.toString(), 'utf8');
-    print('Thank you');
-  });
-};
+const { Field } = require('./src/field.js');
+process.stdin.setEncoding('utf8');
 
 const main = () => {
-  const queries = [
-    { query: 'name' },
-    { query: 'DOB' },
-    { query: 'hobbies' }
-  ];
-  
-  const form = new Form(queries.map(x => x.query));
-  print(form.message());
-  recordResponse(form);
+  const nameField = new Field('name', 'Please enter your name');
+  const dobField = new Field('dob', 'Please enter your DOB');
+  const hobbiesField = new Field('hobbies', 'Please enter your hobbies');
+
+  const queries = [nameField, dobField, hobbiesField];
+  const form = new Form(queries);
+  console.log(form.message());
+
+  process.stdin.on('data', (detail) =>
+    recordResponse(form, detail, console.log));
 };
 
 main();
